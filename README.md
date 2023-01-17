@@ -28,7 +28,7 @@ First, obtain an API access token from https://readwise.io/access_token.
 client = Readwise::Client.new(token: token)
 
 books = client.export # export all highlights
-books = client.export(updated_after: '2023-01-01') # export recent highlights
+books = client.export(updated_after: '2023-01-17T22:02:48Z') # export recent highlights
 books = client.export(book_ids: ['123']) # export specific highlights
 
 puts books.first.title # books are Readwise::Book structs
