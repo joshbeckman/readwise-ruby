@@ -41,7 +41,15 @@ module Readwise
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       response = http.post(uri.path, params.to_json, headers)
-      response.body
+      response_code = Integer(response.code)
+      if response_code == 429
+        retry_after = Integer(response.fetch("Retry-After"))
+        raise Error, "Rate limited exceeded, retry after #{retry_after} seconds"
+      elsif response_code >= 400
+        raise Error, "Save request failed"
+      else
+        response.body
+      end
     end
 
     private
