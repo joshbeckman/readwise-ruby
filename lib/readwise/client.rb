@@ -32,6 +32,18 @@ module Readwise
       results.sort_by(&:highlighted_at_time)
     end
 
+    def save(params)
+      uri = URI("https://readwise.io/api/v3/save")
+      headers = {
+        "Authorization": "Token #{@token}",
+        "Content-Type": "application/json"
+      }
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      response = http.post(uri.path, params.to_json, headers)
+      response.body
+    end
+
     private
 
     def export_page(page_cursor: nil, updated_after: nil, book_ids: [])
