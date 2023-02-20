@@ -9,6 +9,7 @@ module Readwise
     :category,
     :cover_image_url,
     :highlights,
+    :note,
     :readable_title,
     :readwise_url,
     :source,

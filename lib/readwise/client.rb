@@ -56,6 +56,7 @@ module Readwise
           book_id: item['user_book_id'].to_s,
           category: item['category'],
           cover_image_url: item['cover_image_url'],
+          note: item['document_note'],
           readable_title: item['readable_title'],
           readwise_url: item['readwise_url'],
           source: item['source'],
