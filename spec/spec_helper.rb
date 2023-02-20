@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "rspec/file_fixtures"
 require "readwise"
 
 RSpec.configure do |config|

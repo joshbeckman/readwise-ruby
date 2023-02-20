@@ -35,20 +35,7 @@ module Readwise
     private
 
     def export_page(page_cursor: nil, updated_after: nil, book_ids: [])
-      params = {}
-      params['updatedAfter'] = updated_after if updated_after
-      params['ids'] = book_ids if book_ids.any?
-      params['pageCursor'] = page_cursor if page_cursor
-      url = 'https://readwise.io/api/v2/export/?' + URI.encode_www_form(params)
-      export_uri = URI.parse(url)
-      export_req = Net::HTTP::Get.new(export_uri)
-      export_req['Authorization'] = "Token #{@token}"
-      export_res = Net::HTTP.start(export_uri.hostname, export_uri.port, use_ssl: true) do |http|
-        http.request(export_req)
-      end
-      raise Error, 'Export request failed' unless export_res.is_a?(Net::HTTPSuccess)
-
-      parsed_body = JSON.parse(export_res.body)
+      parsed_body = get_export_page(page_cursor: page_cursor, updated_after: updated_after, book_ids: book_ids)
       results = parsed_body.dig('results').map do |item|
         Book.new(
           asin: item['asin'],
@@ -91,6 +78,23 @@ module Readwise
         results: results,
         next_page_cursor: parsed_body.dig('nextPageCursor')
       }
+    end
+
+    def get_export_page(page_cursor: nil, updated_after: nil, book_ids: [])
+      params = {}
+      params['updatedAfter'] = updated_after if updated_after
+      params['ids'] = book_ids if book_ids.any?
+      params['pageCursor'] = page_cursor if page_cursor
+      url = 'https://readwise.io/api/v2/export/?' + URI.encode_www_form(params)
+      export_uri = URI.parse(url)
+      export_req = Net::HTTP::Get.new(export_uri)
+      export_req['Authorization'] = "Token #{@token}"
+      export_res = Net::HTTP.start(export_uri.hostname, export_uri.port, use_ssl: true) do |http|
+        http.request(export_req)
+      end
+      raise Error, 'Export request failed' unless export_res.is_a?(Net::HTTPSuccess)
+
+      JSON.parse(export_res.body)
     end
   end
 end
