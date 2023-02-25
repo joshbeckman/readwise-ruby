@@ -2,6 +2,7 @@ require 'json'
 require 'net/http'
 require_relative 'book.rb'
 require_relative 'highlight.rb'
+require_relative 'tag.rb'
 
 module Readwise
   class Client
@@ -48,7 +49,11 @@ module Readwise
           readwise_url: item['readwise_url'],
           source: item['source'],
           source_url: item['source_url'],
-          tags: item['book_tags'],
+          tags: item['book_tags'].map do |tag|
+            Tag.new(
+              name: tag['name']
+            )
+          end,
           title: item['title'],
           unique_url: item['unique_url'],
           highlights: item['highlights'].map do |highlight|
@@ -66,7 +71,11 @@ module Readwise
               location_type: highlight['location_type'],
               note: highlight['note'],
               readwise_url: highlight['readwise_url'],
-              tags: highlight['tags'],
+              tags: highlight['tags'].map do |tag|
+                Tag.new(
+                  name: tag['name']
+                )
+              end,
               text: highlight['text'],
               updated_at: highlight['updated_at'],
               url: highlight['url'],
