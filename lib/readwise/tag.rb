@@ -1,5 +1,5 @@
 module Readwise
-  Tag =  Struct.new(
+  Tag = Struct.new(
     'ReadwiseTag',
     :name,
     keyword_init: true
