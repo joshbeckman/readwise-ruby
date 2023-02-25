@@ -2,7 +2,7 @@ require 'json'
 require 'net/http'
 require_relative 'book.rb'
 require_relative 'highlight.rb'
-require_relative 'tag.rb'
+require_relative 'tag'
 
 module Readwise
   class Client
