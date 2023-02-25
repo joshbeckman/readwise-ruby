@@ -1,4 +1,3 @@
-require "readwise/version"
 
 RSpec.describe Readwise do
   it "has a version number" do
