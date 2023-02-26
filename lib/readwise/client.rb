@@ -1,7 +1,7 @@
 require 'json'
 require 'net/http'
-require_relative 'book.rb'
-require_relative 'highlight.rb'
+require_relative 'book'
+require_relative 'highlight'
 require_relative 'tag'
 
 module Readwise
