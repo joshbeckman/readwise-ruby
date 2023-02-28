@@ -1,7 +1,7 @@
 module Readwise
   Tag = Struct.new(
     'ReadwiseTag',
-    :id,
+    :tag_id,
     :name,
     keyword_init: true
   )

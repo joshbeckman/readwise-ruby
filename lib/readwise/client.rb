@@ -51,7 +51,7 @@ module Readwise
           source_url: item['source_url'],
           tags: item['book_tags'].map do |tag|
             Tag.new(
-              id: tag['id'].to_s,
+              tag_id: tag['id'].to_s,
               name: tag['name']
             )
           end,
@@ -74,7 +74,7 @@ module Readwise
               readwise_url: highlight['readwise_url'],
               tags: highlight['tags'].map do |tag|
                 Tag.new(
-                  id: tag['id'].to_s,
+                  tag_id: tag['id'].to_s,
                   name: tag['name']
                 )
               end,
