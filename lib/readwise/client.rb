@@ -21,6 +21,44 @@ module Readwise
       raise NotImplementedError
     end
 
+    def get_highlight(highlight_id:)
+      url = 'https://readwise.io/api/v2/highlights/' + highlight_id
+      highlight_uri = URI.parse(url)
+      highlight_req = Net::HTTP::Get.new(highlight_uri)
+      highlight_req['Authorization'] = "Token #{@token}"
+      highlight_res = Net::HTTP.start(highlight_uri.hostname, highlight_uri.port, use_ssl: true) do |http|
+        http.request(highlight_req)
+      end
+      raise Error, 'Export request failed' unless highlight_res.is_a?(Net::HTTPSuccess)
+
+      parsed_highlight = JSON.parse(highlight_res.body)
+
+      Highlight.new(
+        book_id: parsed_highlight['book_id'].to_s,
+        color: parsed_highlight['color'],
+        created_at: parsed_highlight['created_at'],
+        end_location: parsed_highlight['end_location'],
+        external_id: parsed_highlight['external_id'],
+        highlight_id: parsed_highlight['id'].to_s,
+        highlighted_at: parsed_highlight['highlighted_at'],
+        is_discard: parsed_highlight['is_discard'],
+        is_favorite: parsed_highlight['is_favorite'],
+        location: parsed_highlight['location'],
+        location_type: parsed_highlight['location_type'],
+        note: parsed_highlight['note'],
+        readwise_url: parsed_highlight['readwise_url'],
+        tags: parsed_highlight['tags'].map do |tag|
+          Tag.new(
+            tag_id: tag['id'].to_s,
+            name: tag['name']
+          )
+        end,
+        text: parsed_highlight['text'],
+        updated_at: parsed_highlight['updated_at'],
+        url: parsed_highlight['url'],
+      )
+    end
+
     def export(updated_after: nil, book_ids: [])
       resp = export_page(updated_after: updated_after, book_ids: book_ids)
       next_page_cursor = resp[:next_page_cursor]
