@@ -8,6 +8,8 @@ module Readwise
   class Client
     class Error < StandardError; end
 
+    BASE_URL = "https://readwise.io/api/v2/"
+
     def initialize(token: nil)
       raise ArgumentError unless token
       @token = token.to_s
@@ -22,41 +24,15 @@ module Readwise
     end
 
     def get_highlight(highlight_id:)
-      url = 'https://readwise.io/api/v2/highlights/' + highlight_id
-      highlight_uri = URI.parse(url)
-      highlight_req = Net::HTTP::Get.new(highlight_uri)
-      highlight_req['Authorization'] = "Token #{@token}"
-      highlight_res = Net::HTTP.start(highlight_uri.hostname, highlight_uri.port, use_ssl: true) do |http|
-        http.request(highlight_req)
+      url = BASE_URL + 'highlights/' + highlight_id
+
+      begin
+        res = make_readwise_request(url)
+      rescue => exception
+        raise exception
       end
-      raise Error, 'Export request failed' unless highlight_res.is_a?(Net::HTTPSuccess)
 
-      parsed_highlight = JSON.parse(highlight_res.body)
-
-      Highlight.new(
-        book_id: parsed_highlight['book_id'].to_s,
-        color: parsed_highlight['color'],
-        created_at: parsed_highlight['created_at'],
-        end_location: parsed_highlight['end_location'],
-        external_id: parsed_highlight['external_id'],
-        highlight_id: parsed_highlight['id'].to_s,
-        highlighted_at: parsed_highlight['highlighted_at'],
-        is_discard: parsed_highlight['is_discard'],
-        is_favorite: parsed_highlight['is_favorite'],
-        location: parsed_highlight['location'],
-        location_type: parsed_highlight['location_type'],
-        note: parsed_highlight['note'],
-        readwise_url: parsed_highlight['readwise_url'],
-        tags: parsed_highlight['tags'].map do |tag|
-          Tag.new(
-            tag_id: tag['id'].to_s,
-            name: tag['name']
-          )
-        end,
-        text: parsed_highlight['text'],
-        updated_at: parsed_highlight['updated_at'],
-        url: parsed_highlight['url'],
-      )
+      transform_highlight(res)
     end
 
     def export(updated_after: nil, book_ids: [])
@@ -134,16 +110,55 @@ module Readwise
       params['updatedAfter'] = updated_after if updated_after
       params['ids'] = book_ids if book_ids.any?
       params['pageCursor'] = page_cursor if page_cursor
-      url = 'https://readwise.io/api/v2/export/?' + URI.encode_www_form(params)
-      export_uri = URI.parse(url)
-      export_req = Net::HTTP::Get.new(export_uri)
-      export_req['Authorization'] = "Token #{@token}"
-      export_res = Net::HTTP.start(export_uri.hostname, export_uri.port, use_ssl: true) do |http|
-        http.request(export_req)
-      end
-      raise Error, 'Export request failed' unless export_res.is_a?(Net::HTTPSuccess)
+      url = BASE_URL + 'export/?' + URI.encode_www_form(params)
 
-      JSON.parse(export_res.body)
+      begin
+        res = make_readwise_request(url)
+      rescue => exception
+        raise Error, exception.message
+      end
+
+      res
+    end
+
+    def transform_highlight(res)
+      Highlight.new(
+        book_id: res['book_id'].to_s,
+        color: res['color'],
+        created_at: res['created_at'],
+        end_location: res['end_location'],
+        external_id: res['external_id'],
+        highlight_id: res['id'].to_s,
+        highlighted_at: res['highlighted_at'],
+        is_discard: res['is_discard'],
+        is_favorite: res['is_favorite'],
+        location: res['location'],
+        location_type: res['location_type'],
+        note: res['note'],
+        readwise_url: res['readwise_url'],
+        tags: res['tags'].map do |tag|
+          Tag.new(
+            tag_id: tag['id'].to_s,
+            name: tag['name']
+          )
+        end,
+        text: res['text'],
+        updated_at: res['updated_at'],
+        url: res['url'],
+      )
+    end
+
+    def make_readwise_request(url)
+      uri = URI.parse(url)
+      req = Net::HTTP::Get.new(uri)
+      req['Authorization'] = "Token #{@token}"
+      res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        http.request(req)
+      end
+      
+      raise Error, 'Export request failed' unless res.is_a?(Net::HTTPSuccess)
+  
+      JSON.parse(res.body)
     end
   end
 end
