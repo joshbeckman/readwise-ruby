@@ -26,11 +26,7 @@ module Readwise
     def get_highlight(highlight_id:)
       url = BASE_URL + 'highlights/' + highlight_id
 
-      begin
-        res = make_readwise_request(url)
-      rescue => exception
-        raise exception
-      end
+      res = get_readwise_request(url)
 
       transform_highlight(res)
     end
@@ -112,13 +108,8 @@ module Readwise
       params['pageCursor'] = page_cursor if page_cursor
       url = BASE_URL + 'export/?' + URI.encode_www_form(params)
 
-      begin
-        res = make_readwise_request(url)
-      rescue => exception
-        raise Error, exception.message
-      end
+      get_readwise_request(url)
 
-      res
     end
 
     def transform_highlight(res)
@@ -148,7 +139,7 @@ module Readwise
       )
     end
 
-    def make_readwise_request(url)
+    def get_readwise_request(url)
       uri = URI.parse(url)
       req = Net::HTTP::Get.new(uri)
       req['Authorization'] = "Token #{@token}"
