@@ -59,40 +59,10 @@ module Readwise
           readwise_url: item['readwise_url'],
           source: item['source'],
           source_url: item['source_url'],
-          tags: item['book_tags'].map do |tag|
-            Tag.new(
-              tag_id: tag['id'].to_s,
-              name: tag['name']
-            )
-          end,
+          tags: item['book_tags'].map { |tag| transform_tag(tag) },
           title: item['title'],
           unique_url: item['unique_url'],
-          highlights: item['highlights'].map do |highlight|
-            Highlight.new(
-              book_id: highlight['book_id'].to_s,
-              color: highlight['color'],
-              created_at: highlight['created_at'],
-              end_location: highlight['end_location'],
-              external_id: highlight['external_id'],
-              highlight_id: highlight['id'].to_s,
-              highlighted_at: highlight['highlighted_at'],
-              is_discard: highlight['is_discard'],
-              is_favorite: highlight['is_favorite'],
-              location: highlight['location'],
-              location_type: highlight['location_type'],
-              note: highlight['note'],
-              readwise_url: highlight['readwise_url'],
-              tags: highlight['tags'].map do |tag|
-                Tag.new(
-                  tag_id: tag['id'].to_s,
-                  name: tag['name']
-                )
-              end,
-              text: highlight['text'],
-              updated_at: highlight['updated_at'],
-              url: highlight['url'],
-            )
-          end
+          highlights: item['highlights'].map { |highlight| transform_highlight(highlight) },
         )
       end
       {
@@ -136,6 +106,13 @@ module Readwise
         text: res['text'],
         updated_at: res['updated_at'],
         url: res['url'],
+      )
+    end
+
+    def transform_tag(res)
+      Tag.new(
+        tag_id: res['id'].to_s,
+        name: res['name'],
       )
     end
 
