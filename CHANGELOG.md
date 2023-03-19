@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2023-03-19
+
+- Add `get_highlight` client method ([#10](https://github.com/andjosh/readwise-ruby/pull/10) from [@ajistrying](https://github.com/ajistrying))
+
 ## [0.3.0] - 2023-02-28
 
 - Change `Tag` from hash to struct ([#6](https://github.com/andjosh/readwise-ruby/pull/6) from [@ajistrying](https://github.com/ajistrying))
