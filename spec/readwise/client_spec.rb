@@ -1,4 +1,5 @@
 require 'readwise/client'
+require 'readwise/highlight'
 require "rspec/file_fixtures"
 
 RSpec.describe Readwise::Client do
@@ -18,6 +19,18 @@ RSpec.describe Readwise::Client do
       expect(subject).to receive(:get_export_page).and_return(export_response)
 
       subject.export
+    end
+  end
+
+  context 'retrieving a highlight' do
+    subject { Readwise::Client.new(token: 'foo') }
+    let(:highlight_response) { fixture('highlight.json').from_json(false) }
+
+    it 'can parse highlight data' do
+      expect(subject).to receive(:get_readwise_request).and_return(highlight_response)
+
+      highlight = subject.get_highlight(highlight_id: "12345")
+      expect(highlight).to be_instance_of Readwise::Highlight
     end
   end
 end
