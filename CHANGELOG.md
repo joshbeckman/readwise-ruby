@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+- Add methods to create/update highlights
+- Add methods to add/update/remove highlight tags
+- Add method to get book
 
 ## [0.4.0] - 2023-03-19
 

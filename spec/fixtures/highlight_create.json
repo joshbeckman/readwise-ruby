@@ -1,0 +1,18 @@
+[
+  {
+    "id": 111,
+    "title": "Moby Dick",
+    "author": "Herman Melville",
+    "category": "books",
+    "source": "api_book",
+    "num_highlights": 2,
+    "last_highlight_at": null,
+    "updated": "2020-10-08T12:00:22.447912Z",
+    "cover_image_url": "https://readwise.io/static/images/default-book-icon-0.png",
+    "highlights_url": "https://readwise.io/bookreview/111",
+    "source_url": null,
+    "modified_highlights": [
+      1337
+    ]
+  }
+]

@@ -39,5 +39,45 @@ module Readwise
 
       Time.parse(highlighted_at)
     end
+
+    def serialize
+      to_h
+    end
+  end
+
+  HighlightCreate = Struct.new(
+    'ReadwiseHighlightCreate',
+    :author,
+    :category,  # One of: books, articles, tweets or podcasts.
+                # (default: articles when source_url is provided, otherwise: books)
+    :highlight_url,
+    :highlighted_at,
+    :image_url,
+    :location,
+    :location_type, # One of: page, order or time_offset (default: order)
+    :note,
+    :source_type,
+    :source_url,
+    :text,
+    :title,
+    keyword_init: true
+  ) do
+    def serialize
+      to_h.compact
+    end
+  end
+
+  HighlightUpdate = Struct.new(
+    'ReadwiseHighlightUpdate',
+    :color,
+    :location,
+    :note,
+    :text,
+    :url,
+    keyword_init: true
+  ) do
+    def serialize
+      to_h.compact
+    end
   end
 end
