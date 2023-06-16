@@ -12,23 +12,79 @@ module Readwise
 
     def initialize(token: nil)
       raise ArgumentError unless token
+
       @token = token.to_s
     end
 
     def create_highlight(highlight:)
-      create_highlights([highlight])
+      create_highlights(highlights: [highlight]).first
     end
 
     def create_highlights(highlights: [])
-      raise NotImplementedError
+      raise ArgumentError unless highlights.all? { |item| item.is_a?(Readwise::HighlightCreate) }
+      return [] unless highlights.any?
+
+      url = BASE_URL + 'highlights/'
+
+      payload = { highlights: highlights.map(&:serialize) }
+      res = post_readwise_request(url, payload: payload)
+
+      modified_ids = res.map { |book| book['modified_highlights'] }.flatten
+      modified_ids.map { |id| get_highlight(highlight_id: id) }
     end
 
     def get_highlight(highlight_id:)
-      url = BASE_URL + 'highlights/' + highlight_id
+      url = BASE_URL + "highlights/#{highlight_id}"
 
       res = get_readwise_request(url)
 
       transform_highlight(res)
+    end
+
+    def update_highlight(highlight:, update:)
+      raise ArgumentError unless update.is_a?(Readwise::HighlightUpdate)
+
+      url = BASE_URL + "highlights/#{highlight.highlight_id}"
+
+      res = patch_readwise_request(url, payload: update.serialize)
+
+      transform_highlight(res)
+    end
+
+    def remove_highlight_tag(highlight:, tag:)
+      url = BASE_URL + "highlights/#{highlight.highlight_id}/tags/#{tag.tag_id}"
+
+      delete_readwise_request(url)
+    end
+
+    def add_highlight_tag(highlight:, tag:)
+      raise ArgumentError unless tag.is_a?(Readwise::Tag)
+
+      url = BASE_URL + "highlights/#{highlight.highlight_id}/tags"
+
+      payload = tag.serialize.select { |k, v| k == :name }
+      res = post_readwise_request(url, payload: payload)
+
+      transform_tag(res)
+    end
+
+    def update_highlight_tag(highlight:, tag:)
+      raise ArgumentError unless tag.is_a?(Readwise::Tag)
+
+      url = BASE_URL + "highlights/#{highlight.highlight_id}/tags/#{tag.tag_id}"
+
+      payload = tag.serialize.select { |k, v| k == :name }
+      res = patch_readwise_request(url, payload: payload)
+
+      transform_tag(res)
+    end
+
+    def get_book(book_id:)
+      url = BASE_URL + "books/#{book_id}"
+
+      res = get_readwise_request(url)
+
+      transform_book(res)
     end
 
     def export(updated_after: nil, book_ids: [])
@@ -48,22 +104,7 @@ module Readwise
     def export_page(page_cursor: nil, updated_after: nil, book_ids: [])
       parsed_body = get_export_page(page_cursor: page_cursor, updated_after: updated_after, book_ids: book_ids)
       results = parsed_body.dig('results').map do |item|
-        Book.new(
-          asin: item['asin'],
-          author: item['author'],
-          book_id: item['user_book_id'].to_s,
-          category: item['category'],
-          cover_image_url: item['cover_image_url'],
-          note: item['document_note'],
-          readable_title: item['readable_title'],
-          readwise_url: item['readwise_url'],
-          source: item['source'],
-          source_url: item['source_url'],
-          tags: item['book_tags'].map { |tag| transform_tag(tag) },
-          title: item['title'],
-          unique_url: item['unique_url'],
-          highlights: item['highlights'].map { |highlight| transform_highlight(highlight) },
-        )
+        transform_book(item)
       end
       {
         results: results,
@@ -80,6 +121,27 @@ module Readwise
 
       get_readwise_request(url)
 
+    end
+
+    def transform_book(res)
+      highlights = (res['highlights'] || []).map { |highlight| transform_highlight(highlight) }
+      Book.new(
+        asin: res['asin'],
+        author: res['author'],
+        book_id: res['user_book_id'].to_s,
+        category: res['category'],
+        cover_image_url: res['cover_image_url'],
+        note: res['document_note'],
+        readable_title: res['readable_title'],
+        readwise_url: res['readwise_url'] || res['highlights_url'],
+        source: res['source'],
+        source_url: res['source_url'],
+        tags: (res['book_tags'] || res['tags'] || []).map { |tag| transform_tag(tag) },
+        title: res['title'],
+        unique_url: res['unique_url'],
+        highlights: highlights,
+        num_highlights: res['num_highlights'] || highlights.size,
+      )
     end
 
     def transform_highlight(res)
@@ -118,10 +180,51 @@ module Readwise
       res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
         http.request(req)
       end
-      
-      raise Error, 'Export request failed' unless res.is_a?(Net::HTTPSuccess)
-  
+
+      raise Error, 'Get request failed' unless res.is_a?(Net::HTTPSuccess)
+
       JSON.parse(res.body)
+    end
+
+    def patch_readwise_request(url, payload:)
+      uri = URI.parse(url)
+      req = Net::HTTP::Patch.new(uri)
+      req['Authorization'] = "Token #{@token}"
+      req['Content-Type'] = 'application/json'
+      req.body = payload.to_json
+      res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        http.request(req)
+      end
+
+      raise Error, 'Patch request failed' unless res.is_a?(Net::HTTPSuccess)
+
+      JSON.parse(res.body)
+    end
+
+    def post_readwise_request(url, payload:)
+      uri = URI.parse(url)
+      req = Net::HTTP::Post.new(uri)
+      req['Authorization'] = "Token #{@token}"
+      req['Content-Type'] = 'application/json'
+      req.body = payload.to_json
+      res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        http.request(req)
+      end
+
+      raise Error, 'Post request failed' unless res.is_a?(Net::HTTPSuccess)
+
+      JSON.parse(res.body)
+    end
+
+    def delete_readwise_request(url)
+      uri = URI.parse(url)
+      req = Net::HTTP::Delete.new(uri)
+      req['Authorization'] = "Token #{@token}"
+      res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        http.request(req)
+      end
+
+      raise Error, 'Delete request failed' unless res.is_a?(Net::HTTPSuccess)
     end
   end
 end

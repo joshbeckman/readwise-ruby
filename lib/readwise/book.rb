@@ -10,6 +10,7 @@ module Readwise
     :cover_image_url,
     :highlights,
     :note,
+    :num_highlights,
     :readable_title,
     :readwise_url,
     :source,
