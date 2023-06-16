@@ -1,7 +1,9 @@
 # Changelog
 
 ## [Unreleased]
-- Add methods to create/update highlights
+
+## [0.5.0] - 2023-06-15
+- Add methods to create/update highlights ([#8](https://github.com/joshbeckman/readwise-ruby/pull/12))
 - Add methods to add/update/remove highlight tags
 - Add method to get book
 
