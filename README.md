@@ -1,5 +1,7 @@
 # Readwise
 
+[![Gem Version](https://badge.fury.io/rb/readwise.svg)](https://badge.fury.io/rb/readwise) [![Ruby](https://github.com/joshbeckman/readwise-ruby/actions/workflows/ruby.yml/badge.svg)](https://github.com/joshbeckman/readwise-ruby/actions/workflows/ruby.yml)
+
 [Readwise](https://readwise.io/) is an application suite to store, revisit, and learn from your book and article highlights. This is a basic library to call the [Readwise API](https://readwise.io/api_deets) to read and write highlights.
 
 This library is not at 100% coverage of the API, so if you need a method that is missing, open an issue or contribute changes!
