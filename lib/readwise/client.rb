@@ -243,7 +243,7 @@ module Readwise
         source: res['source'],
         source_url: res['source_url'],
         summary: res['summary'],
-        tags: res['tags'].map { |tag| transform_tag(tag) },
+        tags: (res['tags'] || []).map { |tag| transform_tag(tag) },
         title: res['title'],
         updated_at: res['updated_at'],
         url: res['url'],
