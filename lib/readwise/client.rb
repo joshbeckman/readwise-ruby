@@ -252,6 +252,10 @@ module Readwise
     end
 
     def transform_tag(res)
+      if res.is_a?(String)
+        return Tag.new(name: res)
+      end
+
       Tag.new(
         tag_id: res['id'].to_s,
         name: res['name'],
