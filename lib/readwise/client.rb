@@ -243,15 +243,25 @@ module Readwise
         source: res['source'],
         source_url: res['source_url'],
         summary: res['summary'],
-        tags: (res['tags'] || []).map { |tag| transform_tag(tag) },
+        tags: transform_tags(res['tags']),
         title: res['title'],
         updated_at: res['updated_at'],
         url: res['url'],
         word_count: res['word_count'],
       )
-    rescue TypeError
-      puts res
-      raise
+    end
+
+    def transform_tags(res)
+      if res.is_a?(Array)
+        res.map { |tag| transform_tag(tag) }
+      elsif res.is_a?(Hash)
+        res.map do |tag_id, tag|
+          tag['id'] = tag_id
+          transform_tag(tag)
+        end
+      else
+        []
+      end
     end
 
     def transform_tag(res)
@@ -260,7 +270,7 @@ module Readwise
       end
 
       Tag.new(
-        tag_id: res['id'].to_s,
+        tag_id: res['id']&.to_s,
         name: res['name'],
       )
     end
