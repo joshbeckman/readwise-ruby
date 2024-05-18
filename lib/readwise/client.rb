@@ -249,6 +249,9 @@ module Readwise
         url: res['url'],
         word_count: res['word_count'],
       )
+    rescue TypeError
+      puts res
+      raise
     end
 
     def transform_tag(res)
