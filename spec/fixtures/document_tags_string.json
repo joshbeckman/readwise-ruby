@@ -1,0 +1,22 @@
+{
+  "id": "string-tags-doc",
+  "author": "Test Author",
+  "category": "article",
+  "created_at": "2023-01-15T10:30:00Z",
+  "html": "<p>Content with string tags</p>",
+  "image_url": null,
+  "location": "new",
+  "notes": null,
+  "parent_id": null,
+  "published_date": null,
+  "reading_progress": 0.5,
+  "site_name": "Test Site",
+  "source": "web",
+  "source_url": "https://example.com/string-tags",
+  "summary": "Document with string tags",
+  "tags": ["tag1", "tag2", "tag3"],
+  "title": "Document with String Tags",
+  "updated_at": "2023-01-15T10:30:00Z",
+  "url": "https://example.com/string-tags",
+  "word_count": 500
+}

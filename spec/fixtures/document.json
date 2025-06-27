@@ -1,0 +1,25 @@
+{
+  "id": "123456",
+  "author": "John Doe",
+  "category": "article",
+  "created_at": "2023-01-15T10:30:00Z",
+  "html": "<p>This is some sample HTML content.</p>",
+  "image_url": "https://example.com/image.jpg",
+  "location": "new",
+  "notes": "Some notes about this document",
+  "parent_id": null,
+  "published_date": 1673780400000,
+  "reading_progress": 0.75,
+  "site_name": "Example Site",
+  "source": "web",
+  "source_url": "https://example.com/article",
+  "summary": "This is a summary of the article",
+  "tags": [
+    {"id": "tag1", "name": "technology"},
+    {"id": "tag2", "name": "programming"}
+  ],
+  "title": "Sample Article Title",
+  "updated_at": "2023-01-16T12:00:00Z",
+  "url": "https://example.com/article",
+  "word_count": 1200
+}
