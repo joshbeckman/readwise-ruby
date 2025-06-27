@@ -283,7 +283,7 @@ module Readwise
         http.request(req)
       end
 
-      raise Error, 'Get request failed' unless res.is_a?(Net::HTTPSuccess)
+      raise Error, "Get request failed with status code: #{res.code}" unless res.is_a?(Net::HTTPSuccess)
 
       JSON.parse(res.body)
     end
