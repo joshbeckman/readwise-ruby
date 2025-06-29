@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-06-29
+- Handle absent tags in transforming highlights
+
 ## [1.0.0] - 2025-06-29
 - Add Readwise API v3 support for Reader documents ([#13](https://github.com/joshbeckman/readwise-ruby/pull/13))
 - Add `daily_review` client method and Review type ([#14](https://github.com/joshbeckman/readwise-ruby/pull/14))

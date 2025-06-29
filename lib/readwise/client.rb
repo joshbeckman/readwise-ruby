@@ -227,7 +227,7 @@ module Readwise
         location_type: res['location_type'],
         note: res['note'],
         readwise_url: res['readwise_url'],
-        tags: res['tags'].map { |tag| transform_tag(tag) },
+        tags: (res['tags'] || []).map { |tag| transform_tag(tag) },
         text: res['text'],
         updated_at: res['updated_at'],
         url: res['url'],
