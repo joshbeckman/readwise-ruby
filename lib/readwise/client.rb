@@ -3,17 +3,56 @@ require 'net/http'
 require_relative 'book'
 require_relative 'highlight'
 require_relative 'tag'
+require_relative 'document'
 
 module Readwise
   class Client
     class Error < StandardError; end
 
     BASE_URL = "https://readwise.io/api/v2/"
+    V3_BASE_URL = "https://readwise.io/api/v3/"
 
     def initialize(token: nil)
       raise ArgumentError unless token
 
       @token = token.to_s
+    end
+
+    def create_document(document:)
+      raise ArgumentError unless document.is_a?(Readwise::DocumentCreate)
+
+      url = V3_BASE_URL + 'save/'
+
+      res = post_readwise_request(url, payload: document.serialize)
+      get_document(document_id: res['id'])
+    end
+
+    def create_documents(documents: [])
+      return [] unless documents.any?
+
+      documents.map do |document|
+        create_document(document: document)
+      end
+    end
+
+    def get_document(document_id:)
+      url = V3_BASE_URL + "list?id=#{document_id}"
+
+      res = get_readwise_request(url)
+
+      res['results'].map { |item| transform_document(item) }.first
+    end
+
+    def get_documents(updated_after: nil, location: nil, category: nil)
+      resp = documents_page(updated_after: updated_after, location: location, category: category)
+      next_page_cursor = resp[:next_page_cursor]
+      results = resp[:results]
+      while next_page_cursor
+        resp = documents_page(updated_after: updated_after, location: location, category: category, page_cursor: next_page_cursor)
+        results.concat(resp[:results])
+        next_page_cursor = resp[:next_page_cursor]
+      end
+      results.sort_by(&:created_at)
     end
 
     def create_highlight(highlight:)
@@ -101,6 +140,28 @@ module Readwise
 
     private
 
+    def documents_page(page_cursor: nil, updated_after:, location:, category:)
+      parsed_body = get_documents_page(page_cursor: page_cursor, updated_after: updated_after, location: location, category: category)
+      results = parsed_body.dig('results').map do |item|
+        transform_document(item)
+      end
+      {
+        results: results,
+        next_page_cursor: parsed_body.dig('nextPageCursor')
+      }
+    end
+
+    def get_documents_page(page_cursor: nil, updated_after:, location:, category:)
+      params = {}
+      params['updatedAfter'] = updated_after if updated_after
+      params['location'] = location if location
+      params['category'] = category if category
+      params['pageCursor'] = page_cursor if page_cursor
+      url = V3_BASE_URL + 'list/?' + URI.encode_www_form(params)
+
+      get_readwise_request(url)
+    end
+
     def export_page(page_cursor: nil, updated_after: nil, book_ids: [])
       parsed_body = get_export_page(page_cursor: page_cursor, updated_after: updated_after, book_ids: book_ids)
       results = parsed_body.dig('results').map do |item|
@@ -120,7 +181,6 @@ module Readwise
       url = BASE_URL + 'export/?' + URI.encode_www_form(params)
 
       get_readwise_request(url)
-
     end
 
     def transform_book(res)
@@ -166,9 +226,51 @@ module Readwise
       )
     end
 
+    def transform_document(res)
+      Document.new(
+        author: res['author'],
+        category: res['category'],
+        created_at: res['created_at'],
+        html: res['html'],
+        id: res['id'].to_s,
+        image_url: res['image_url'],
+        location: res['location'],
+        notes: res['notes'],
+        parent_id: res['parent_id'],
+        published_date: res['published_date'],
+        reading_progress: res['reading_progress'],
+        site_name: res['site_name'],
+        source: res['source'],
+        source_url: res['source_url'],
+        summary: res['summary'],
+        tags: transform_tags(res['tags']),
+        title: res['title'],
+        updated_at: res['updated_at'],
+        url: res['url'],
+        word_count: res['word_count'],
+      )
+    end
+
+    def transform_tags(res)
+      if res.is_a?(Array)
+        res.map { |tag| transform_tag(tag) }
+      elsif res.is_a?(Hash)
+        res.map do |tag_id, tag|
+          tag['id'] = tag_id
+          transform_tag(tag)
+        end
+      else
+        []
+      end
+    end
+
     def transform_tag(res)
+      if res.is_a?(String)
+        return Tag.new(name: res)
+      end
+
       Tag.new(
-        tag_id: res['id'].to_s,
+        tag_id: res['id']&.to_s,
         name: res['name'],
       )
     end
@@ -181,7 +283,7 @@ module Readwise
         http.request(req)
       end
 
-      raise Error, 'Get request failed' unless res.is_a?(Net::HTTPSuccess)
+      raise Error, "Get request failed with status code: #{res.code}" unless res.is_a?(Net::HTTPSuccess)
 
       JSON.parse(res.body)
     end
