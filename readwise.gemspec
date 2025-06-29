@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "Readwise API client"
   spec.description   = "Minimal Readwise API client and highlight parsing library"
-  spec.homepage      = "https://github.com/andjosh/readwise-ruby"
+  spec.homepage      = "https://github.com/joshbeckman/readwise-ruby"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
