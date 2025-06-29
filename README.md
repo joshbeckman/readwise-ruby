@@ -58,6 +58,14 @@ updated_tag = client.update_highlight_tag(highlight: highlight, tag: added_tag)
 
 # remove a tag from a highlight
 client.remove_highlight_tag(highlight: highlight, tag: added_tag)
+
+# get daily review highlights
+daily_review = client.daily_review
+puts daily_review.id
+puts daily_review.url
+puts daily_review.completed?
+puts daily_review.highlights.size
+puts daily_review.highlights.first.text
 ```
 
 ### Reader API (V3)

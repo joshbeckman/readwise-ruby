@@ -1,6 +1,7 @@
 require 'readwise/client'
 require 'readwise/highlight'
 require 'readwise/document'
+require 'readwise/review'
 require "rspec/file_fixtures"
 
 RSpec.describe Readwise::Client do
@@ -98,6 +99,23 @@ RSpec.describe Readwise::Client do
 
       book = subject.get_book(book_id: "12345")
       expect(book).to be_instance_of Readwise::Book
+    end
+  end
+
+  context 'daily review' do
+    let(:daily_review_response) { fixture('daily_review.json').from_json(false) }
+
+    it 'can retrieve daily review' do
+      expect(subject).to receive(:get_readwise_request).and_return(daily_review_response)
+
+      review = subject.daily_review
+      expect(review).to be_instance_of Readwise::Review
+      expect(review.id).to eq(12345)
+      expect(review.url).to eq('https://readwise.io/review/12345')
+      expect(review.completed?).to be false
+      expect(review.highlights).to be_an(Array)
+      expect(review.highlights.size).to eq(2)
+      expect(review.highlights.first).to be_instance_of Readwise::Highlight
     end
   end
 

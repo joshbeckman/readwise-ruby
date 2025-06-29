@@ -4,6 +4,7 @@ require_relative 'book'
 require_relative 'highlight'
 require_relative 'tag'
 require_relative 'document'
+require_relative 'review'
 
 module Readwise
   class Client
@@ -124,6 +125,13 @@ module Readwise
       res = get_readwise_request(url)
 
       transform_book(res)
+    end
+
+    def daily_review
+      url = BASE_URL + 'review/'
+
+      res = get_readwise_request(url)
+      transform_review(res)
     end
 
     def export(updated_after: nil, book_ids: [])
@@ -272,6 +280,17 @@ module Readwise
       Tag.new(
         tag_id: res['id']&.to_s,
         name: res['name'],
+      )
+    end
+
+    def transform_review(res)
+      highlights = (res['highlights'] || []).map { |highlight| transform_highlight(highlight) }
+
+      Review.new(
+        id: res['review_id'],
+        url: res['review_url'],
+        completed: res['review_completed'],
+        highlights: highlights
       )
     end
 

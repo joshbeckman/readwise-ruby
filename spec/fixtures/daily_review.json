@@ -1,0 +1,45 @@
+{
+  "review_id": 12345,
+  "review_url": "https://readwise.io/review/12345",
+  "review_completed": false,
+  "highlights": [
+    {
+      "id": 123,
+      "text": "This is the first highlight for daily review.",
+      "book_id": 456,
+      "url": "https://readwise.io/highlight/123",
+      "highlighted_at": "2023-01-15T10:30:00.000Z",
+      "created_at": "2023-01-15T10:30:00.000Z",
+      "updated_at": "2023-01-15T10:30:00.000Z",
+      "color": "yellow",
+      "end_location": null,
+      "external_id": null,
+      "is_discard": false,
+      "is_favorite": true,
+      "location": 1,
+      "location_type": "page",
+      "note": null,
+      "readwise_url": "https://readwise.io/highlight/123",
+      "tags": []
+    },
+    {
+      "id": 124,
+      "text": "This is the second highlight for daily review.",
+      "book_id": 457,
+      "url": "https://readwise.io/highlight/124",
+      "highlighted_at": "2023-01-16T14:20:00.000Z",
+      "created_at": "2023-01-16T14:20:00.000Z",
+      "updated_at": "2023-01-16T14:20:00.000Z",
+      "color": "blue",
+      "end_location": null,
+      "external_id": null,
+      "is_discard": false,
+      "is_favorite": false,
+      "location": 5,
+      "location_type": "page",
+      "note": "This is a note on the highlight",
+      "readwise_url": "https://readwise.io/highlight/124",
+      "tags": []
+    }
+  ]
+}
