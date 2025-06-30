@@ -101,7 +101,7 @@ puts document.child?                   # is this a highlight/note of another doc
 
 # Check location
 puts document.in_new?
-puts document.in_later?  
+puts document.in_later?
 puts document.in_archive?
 
 # Check category
@@ -140,6 +140,32 @@ document = client.create_document(document: document_create)
 
 # Create multiple documents
 documents = client.create_documents(documents: [document_create1, document_create2])
+```
+
+## Command Line Interface
+
+This gem includes a `readwise` command-line tool for quickly sending HTML content to Readwise Reader.
+
+First, set your API token:
+```bash
+export READWISE_API_KEY=your_token_here
+```
+
+Then use the CLI to send HTML files:
+```bash
+# Basic usage
+readwise document create --html-file content.html
+readwise document create --url https://datatracker.ietf.org/doc/html/rfc2324
+
+# Short form flag
+readwise document create -f content.html
+
+# With options
+readwise document create --html-file content.html --title="My Article" --location=later
+
+# See all available options
+readwise --help
+readwise document create --help
 ```
 
 ## Development
