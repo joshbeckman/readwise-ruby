@@ -53,4 +53,4 @@ The gem includes a `readwise` CLI  with `document create` command that reads HTM
 - Requires `READWISE_API_KEY` environment variable
 - Takes HTML file path as first argument
 - Supports all DocumentCreate parameters as flags
-- Example: `readwise --title="My Article" --location=later content.html`
+- Example: `readwise document create --title="My Article" --html-file=content.html`
