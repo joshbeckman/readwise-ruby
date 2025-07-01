@@ -48,7 +48,7 @@ This is a Ruby gem that provides a client library for the Readwise API. The arch
 
 ### CLI Tool
 
-The gem includes a `readwise` CLI command that reads HTML content from a file and sends it to Readwise Reader:
+The gem includes a `readwise` CLI  with `document create` command that reads HTML content from a file and sends it to Readwise Reader:
 
 - Requires `READWISE_API_KEY` environment variable
 - Takes HTML file path as first argument
