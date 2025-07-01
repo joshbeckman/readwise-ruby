@@ -4,6 +4,7 @@ module Readwise
   class CLI
     module Document
       class CreateCommand < BaseCommand
+        CATEGORIES = %w[article email rss highlight note pdf epub tweet video].freeze
         def banner
           "Usage: readwise document create [options]"
         end
@@ -45,9 +46,9 @@ module Readwise
             options[:location] = location
           end
 
-          opts.on("--category=CATEGORY", "Document category: article, email, rss, highlight, note, pdf, epub, tweet, video") do |category|
-            unless %w[article email rss highlight note pdf epub tweet video].include?(category)
-              puts "Error: Invalid category. Must be one of: article, email, rss, highlight, note, pdf, epub, tweet, video"
+          opts.on("--category=CATEGORY", "Document category: #{CATEGORIES.join(', ')}") do |category|
+            unless CATEGORIES.include?(category)
+              puts "Error: Invalid category. Must be one of: #{CATEGORIES.join(', ')}"
               exit 1
             end
             options[:category] = category
