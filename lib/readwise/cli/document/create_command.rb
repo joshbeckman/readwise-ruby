@@ -1,10 +1,12 @@
 require_relative '../base_command'
+require_relative '../../constants'
+require 'uri'
+require 'date'
 
 module Readwise
   class CLI
     module Document
       class CreateCommand < BaseCommand
-        CATEGORIES = %w[article email rss highlight note pdf epub tweet video].freeze
         def banner
           "Usage: readwise document create [options]"
         end
@@ -27,6 +29,10 @@ module Readwise
           end
 
           opts.on("-u", "--url=URL", "Source URL (defaults to https://example.com/<filename>)") do |url|
+            unless valid_url?(url)
+              puts "Error: Invalid URL format. Please provide a valid URL."
+              exit 1
+            end
             options[:url] = url
           end
 
@@ -38,17 +44,17 @@ module Readwise
             options[:notes] = notes
           end
 
-          opts.on("--location=LOCATION", "Document location: new, later, archive, feed (default: new)") do |location|
-            unless %w[new later archive feed].include?(location)
-              puts "Error: Invalid location. Must be one of: new, later, archive, feed"
+          opts.on("--location=LOCATION", "Document location: #{Readwise::Constants::DOCUMENT_LOCATIONS.join(', ')} (default: new)") do |location|
+            unless Readwise::Constants::DOCUMENT_LOCATIONS.include?(location)
+              puts "Error: Invalid location. Must be one of: #{Readwise::Constants::DOCUMENT_LOCATIONS.join(', ')}"
               exit 1
             end
             options[:location] = location
           end
 
-          opts.on("--category=CATEGORY", "Document category: #{CATEGORIES.join(', ')}") do |category|
-            unless CATEGORIES.include?(category)
-              puts "Error: Invalid category. Must be one of: #{CATEGORIES.join(', ')}"
+          opts.on("--category=CATEGORY", "Document category: #{Readwise::Constants::DOCUMENT_CATEGORIES.join(', ')}") do |category|
+            unless Readwise::Constants::DOCUMENT_CATEGORIES.include?(category)
+              puts "Error: Invalid category. Must be one of: #{Readwise::Constants::DOCUMENT_CATEGORIES.join(', ')}"
               exit 1
             end
             options[:category] = category
@@ -63,6 +69,10 @@ module Readwise
           end
 
           opts.on("--published-date=DATE", "Published date (ISO 8601 format)") do |date|
+            unless valid_iso8601_date?(date)
+              puts "Error: Invalid date format. Please provide a valid ISO 8601 date (e.g., 2023-12-25T10:30:00Z)."
+              exit 1
+            end
             options[:published_date] = date
           end
 
@@ -103,6 +113,20 @@ module Readwise
         end
 
         private
+
+        def valid_url?(url)
+          uri = URI.parse(url)
+          uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+        rescue URI::InvalidURIError
+          false
+        end
+
+        def valid_iso8601_date?(date)
+          DateTime.iso8601(date)
+          true
+        rescue Date::Error
+          false
+        end
 
         def build_document_params(html_content, html_file)
           document_params = {

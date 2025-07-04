@@ -100,5 +100,19 @@ RSpec.describe 'readwise CLI' do
       expect(status.success?).to be false
       expect(stdout).to include('Error: Invalid category. Must be one of: article, email, rss, highlight, note, pdf, epub, tweet, video')
     end
+
+    it 'shows error for invalid URL' do
+      stdout, _stderr, status = run_cli('document', 'create', '--url=invalid-url', '--html-file', temp_file.path)
+
+      expect(status.success?).to be false
+      expect(stdout).to include('Error: Invalid URL format. Please provide a valid URL.')
+    end
+
+    it 'shows error for invalid date format' do
+      stdout, _stderr, status = run_cli('document', 'create', '--published-date=invalid-date', '--html-file', temp_file.path)
+
+      expect(status.success?).to be false
+      expect(stdout).to include('Error: Invalid date format. Please provide a valid ISO 8601 date')
+    end
   end
 end
