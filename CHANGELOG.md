@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-07-04
+- Add CLI command for creating documents from HTML content or URLs ([#16](https://github.com/joshbeckman/readwise-ruby/pull/16) from [@andyw8](https://github.com/andyw8))
+
 ## [1.0.1] - 2025-06-29
 - Handle absent tags in transforming highlights
 
