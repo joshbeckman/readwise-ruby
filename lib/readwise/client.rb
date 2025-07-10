@@ -44,12 +44,12 @@ module Readwise
       res['results'].map { |item| transform_document(item) }.first
     end
 
-    def get_documents(updated_after: nil, location: nil, category: nil)
-      resp = documents_page(updated_after: updated_after, location: location, category: category)
+    def get_documents(updated_after: nil, location: nil, category: nil, tags: nil)
+      resp = documents_page(updated_after: updated_after, location: location, category: category, tags: tags)
       next_page_cursor = resp[:next_page_cursor]
       results = resp[:results]
       while next_page_cursor
-        resp = documents_page(updated_after: updated_after, location: location, category: category, page_cursor: next_page_cursor)
+        resp = documents_page(updated_after: updated_after, location: location, category: category, tags: tags, page_cursor: next_page_cursor)
         results.concat(resp[:results])
         next_page_cursor = resp[:next_page_cursor]
       end
@@ -148,8 +148,8 @@ module Readwise
 
     private
 
-    def documents_page(page_cursor: nil, updated_after:, location:, category:)
-      parsed_body = get_documents_page(page_cursor: page_cursor, updated_after: updated_after, location: location, category: category)
+    def documents_page(page_cursor: nil, updated_after:, location:, category:, tags:)
+      parsed_body = get_documents_page(page_cursor: page_cursor, updated_after: updated_after, location: location, category: category, tags: tags)
       results = parsed_body.dig('results').map do |item|
         transform_document(item)
       end
@@ -159,12 +159,15 @@ module Readwise
       }
     end
 
-    def get_documents_page(page_cursor: nil, updated_after:, location:, category:)
-      params = {}
-      params['updatedAfter'] = updated_after if updated_after
-      params['location'] = location if location
-      params['category'] = category if category
-      params['pageCursor'] = page_cursor if page_cursor
+    def get_documents_page(page_cursor: nil, updated_after:, location:, category:, tags:)
+      params = []
+      params << ['updatedAfter', updated_after] if updated_after
+      params << ['location', location] if location
+      params << ['category', category] if category
+      if tags && tags.any?
+        tags.each { |tag| params << ['tag', tag] }
+      end
+      params << ['pageCursor', page_cursor] if page_cursor
       url = V3_BASE_URL + 'list/?' + URI.encode_www_form(params)
 
       get_readwise_request(url)

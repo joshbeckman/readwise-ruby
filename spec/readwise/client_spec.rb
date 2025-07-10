@@ -188,11 +188,11 @@ RSpec.describe Readwise::Client do
         page1_with_cursor = page1_response.merge('nextPageCursor' => 'cursor123')
 
         expect(subject).to receive(:get_documents_page)
-          .with(updated_after: nil, location: nil, category: nil, page_cursor: nil)
+          .with(updated_after: nil, location: nil, category: nil, tags: nil, page_cursor: nil)
           .and_return(page1_with_cursor)
 
         expect(subject).to receive(:get_documents_page)
-          .with(updated_after: nil, location: nil, category: nil, page_cursor: 'cursor123')
+          .with(updated_after: nil, location: nil, category: nil, tags: nil, page_cursor: 'cursor123')
           .and_return(page2_response)
 
         documents = subject.get_documents
@@ -210,10 +210,76 @@ RSpec.describe Readwise::Client do
 
       it 'passes filter parameters' do
         expect(subject).to receive(:get_documents_page)
-          .with(updated_after: '2023-01-01', location: 'new', category: 'article', page_cursor: nil)
+          .with(updated_after: '2023-01-01', location: 'new', category: 'article', tags: nil, page_cursor: nil)
           .and_return(page1_response)
 
         subject.get_documents(updated_after: '2023-01-01', location: 'new', category: 'article')
+      end
+
+      it 'passes tags parameter' do
+        expect(subject).to receive(:get_documents_page)
+          .with(updated_after: nil, location: nil, category: nil, tags: ['tech', 'ruby'], page_cursor: nil)
+          .and_return(page1_response)
+
+        subject.get_documents(tags: ['tech', 'ruby'])
+      end
+
+      it 'handles single tag in array' do
+        expect(subject).to receive(:get_documents_page)
+          .with(updated_after: nil, location: nil, category: nil, tags: ['important'], page_cursor: nil)
+          .and_return(page1_response)
+
+        subject.get_documents(tags: ['important'])
+      end
+
+      it 'handles empty tags array' do
+        expect(subject).to receive(:get_documents_page)
+          .with(updated_after: nil, location: nil, category: nil, tags: [], page_cursor: nil)
+          .and_return(page1_response)
+
+        subject.get_documents(tags: [])
+      end
+    end
+
+    context 'URL building with tags' do
+      let(:page1_response) { fixture('document_list.json').from_json(false) }
+
+      it 'builds URL with single tag parameter' do
+        expect(subject).to receive(:get_readwise_request) do |url|
+          expect(url).to include('tag=tech')
+          page1_response
+        end
+
+        subject.send(:get_documents_page, updated_after: nil, location: nil, category: nil, tags: ['tech'])
+      end
+
+      it 'builds URL with multiple tag parameters' do
+        expect(subject).to receive(:get_readwise_request) do |url|
+          expect(url).to include('tag=tech')
+          expect(url).to include('tag=ruby')
+          expect(url).to include('tag=programming')
+          page1_response
+        end
+
+        subject.send(:get_documents_page, updated_after: nil, location: nil, category: nil, tags: ['tech', 'ruby', 'programming'])
+      end
+
+      it 'builds URL without tag parameters when tags is nil' do
+        expect(subject).to receive(:get_readwise_request) do |url|
+          expect(url).not_to include('tag=')
+          page1_response
+        end
+
+        subject.send(:get_documents_page, updated_after: nil, location: nil, category: nil, tags: nil)
+      end
+
+      it 'builds URL without tag parameters when tags is empty' do
+        expect(subject).to receive(:get_readwise_request) do |url|
+          expect(url).not_to include('tag=')
+          page1_response
+        end
+
+        subject.send(:get_documents_page, updated_after: nil, location: nil, category: nil, tags: [])
       end
     end
 
