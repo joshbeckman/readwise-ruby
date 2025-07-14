@@ -311,6 +311,17 @@ RSpec.describe Readwise::Client do
         .to raise_error(Readwise::Client::Error, 'Get request failed with status code: 404')
     end
 
+    it 'raises TooManyRequests error on a 429 response' do
+      response = double(code: '429', is_a?: false)
+      allow(response).to receive(:fetch).with("Retry-After").and_return('120')
+      allow(Net::HTTP).to receive(:start).and_return(response)
+
+      expect { subject.send(:get_readwise_request, 'https://example.com') }
+        .to raise_error(Readwise::Client::TooManyRequests) do |error|
+          expect(error.message).to eq('Try again after 120 seconds')
+        end
+    end
+
     it 'raises error on failed POST request' do
       allow(Net::HTTP).to receive(:start).and_return(double(is_a?: false))
 
