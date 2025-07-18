@@ -9,6 +9,15 @@ require_relative 'review'
 module Readwise
   class Client
     class Error < StandardError; end
+    class TooManyRequests < Error
+      def initialize(retry_after)
+        @retry_after = retry_after
+      end
+
+      def message
+        "Try again after #{@retry_after} seconds"
+      end
+    end
 
     BASE_URL = "https://readwise.io/api/v2/"
     V3_BASE_URL = "https://readwise.io/api/v3/"
@@ -300,6 +309,11 @@ module Readwise
       req['Authorization'] = "Token #{@token}"
       res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
         http.request(req)
+      end
+
+      if res.code == "429" # Too Many Requests
+        retry_after = Integer(res.fetch("Retry-After"))
+        raise TooManyRequests.new(retry_after)
       end
 
       raise Error, "Get request failed with status code: #{res.code}" unless res.is_a?(Net::HTTPSuccess)
